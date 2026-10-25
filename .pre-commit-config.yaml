@@ -1,0 +1,36 @@
+# Fast checks on every commit. The full gate set is `python tools/ci_local.py`.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+        exclude: ^(tests/golden/|docs/simulation\.schema\.json)
+      - id: trailing-whitespace
+        exclude: ^(tests/golden/|docs/)
+      - id: check-yaml
+      - id: check-json
+        exclude: ^\.vscode/
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1500"]
+      - id: detect-private-key
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: public-api-snapshot
+        name: public API snapshot unchanged
+        entry: python tools/api_snapshot.py
+        language: system
+        pass_filenames: false
+        files: ^src/aevion/.*\.py$
+      - id: generated-docs-in-sync
+        name: generated config docs in sync
+        entry: python tools/gen_config_docs.py --check
+        language: system
+        pass_filenames: false
+        files: ^src/aevion/(config|registry)/.*\.py$

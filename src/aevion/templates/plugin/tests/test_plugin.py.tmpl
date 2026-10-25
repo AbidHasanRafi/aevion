@@ -1,0 +1,37 @@
+import numpy as np
+import pytest
+
+from aevion.engine import Simulation
+from aevion.registry import registries
+from {{package}} import register
+
+
+@pytest.fixture(scope="module", autouse=True)
+def registered():
+    # When the package is pip-installed Aevion has already loaded it through the entry point.
+    if "{{component}}" not in registries.sensors:
+        register(registries)
+
+
+def test_components_are_registered_with_this_plugin_as_source():
+    assert registries.sensors.entry("{{component}}").source == "{{package}}"
+    assert "{{component}}_log" in registries.hooks
+
+
+def test_sensor_runs_in_a_simulation_and_respects_its_range_limit():
+    cfg = {
+        "duration": 2.0,
+        "trajectory": {"type": "hover", "params": {"pos": [0, 0, 3.0]}},
+        "sensors": [{"type": "{{component}}", "record": True, "params": {"max_range": 2.0, "noise_std": 0.0}}],
+    }
+    arch = Simulation(cfg).run()
+    readings = np.asarray(arch["sensors/{{component}}"])
+    assert readings.size > 0 and float(readings.max()) <= 2.0 + 1e-9
+
+
+def test_bad_parameters_are_reported_by_the_config_validator():
+    from aevion.config import load_config
+    from aevion.errors import ConfigError
+
+    with pytest.raises(ConfigError, match="max_rnge"):
+        load_config({"sensors": [{"type": "{{component}}", "params": {"max_rnge": 3}}]})

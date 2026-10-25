@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{dist_name}}"
+version = "0.1.0"
+description = "{{description}}"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["aevion>={{aevion_version}}"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+# This is what makes Aevion discover the plugin after `pip install`.
+[project.entry-points."aevion.plugins"]
+{{package}} = "{{package}}:register"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

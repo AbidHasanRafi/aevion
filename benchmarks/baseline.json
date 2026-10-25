@@ -1,0 +1,301 @@
+{
+  "calibration_s": 0.12307149998378009,
+  "environment": {
+    "aevion": "0.1.0",
+    "python": "3.14.3",
+    "numpy": "2.4.2",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "numba": "0.66.0"
+  },
+  "results": {
+    "physics_reference_n1": {
+      "seconds": 0.49968510001781397,
+      "runs": 7,
+      "units": 300,
+      "unit": "vehicle-steps",
+      "per_second": 600.3781181174002,
+      "relative": 4.060120337232168
+    },
+    "physics_reference_n256": {
+      "seconds": 0.2547686000179965,
+      "runs": 7,
+      "units": 25600,
+      "unit": "vehicle-steps",
+      "per_second": 100483.3405615592,
+      "relative": 2.07008608858731
+    },
+    "physics_numba_n256": {
+      "seconds": 0.0402819000009913,
+      "runs": 7,
+      "units": 25600,
+      "unit": "vehicle-steps",
+      "per_second": 635521.1645768945,
+      "relative": 0.327304859421557
+    },
+    "physics_numba_n4096": {
+      "seconds": 0.23582400000304915,
+      "runs": 7,
+      "units": 163840,
+      "unit": "vehicle-steps",
+      "per_second": 694755.4108058619,
+      "relative": 1.9161544308319067
+    },
+    "engine_single_imu": {
+      "seconds": 0.3971558999910485,
+      "runs": 7,
+      "units": 400,
+      "unit": "physics steps",
+      "per_second": 1007.1611677152866,
+      "relative": 3.2270338790328443
+    },
+    "engine_swarm_16": {
+      "seconds": 0.47084319998975843,
+      "runs": 7,
+      "units": 6400,
+      "unit": "vehicle-steps",
+      "per_second": 13592.6355103763,
+      "relative": 3.825769573392801
+    },
+    "engine_forest_lidar": {
+      "seconds": 0.3780419999966398,
+      "runs": 7,
+      "units": 400,
+      "unit": "physics steps",
+      "per_second": 1058.0834933778665,
+      "relative": 3.0717265983307502
+    },
+    "raycast_forest_65k": {
+      "seconds": 0.015777099994011223,
+      "runs": 15,
+      "units": 65536,
+      "unit": "rays",
+      "per_second": 4153868.5832552616,
+      "relative": 0.12819458604218303
+    },
+    "config_load_validate": {
+      "seconds": 0.10905709999497049,
+      "runs": 7,
+      "units": 200,
+      "unit": "configs",
+      "per_second": 1833.9016901166785,
+      "relative": 0.886127982590148
+    },
+    "archive_write_read": {
+      "seconds": 0.28013909998117015,
+      "runs": 7,
+      "units": 5000,
+      "unit": "rows",
+      "per_second": 17848.276089757124,
+      "relative": 2.276230484052688
+    },
+    "figure_render": {
+      "seconds": 0.6072432000073604,
+      "runs": 7,
+      "units": 1,
+      "unit": "figures",
+      "per_second": 1.6467866581097639,
+      "relative": 4.9340684080992805
+    },
+    "wireless_nr_network_n64": {
+      "seconds": 0.26085319998674095,
+      "runs": 7,
+      "units": 1280,
+      "unit": "link evaluations",
+      "per_second": 4906.974497782898,
+      "relative": 2.119525641770186
+    },
+    "wireless_rem_80x80": {
+      "seconds": 0.04638630000408739,
+      "runs": 7,
+      "units": 6400,
+      "unit": "grid points",
+      "per_second": 137971.771825648,
+      "relative": 0.3769052949724409
+    },
+    "wireless_ray_trace_city": {
+      "seconds": 0.015464700001757592,
+      "runs": 15,
+      "units": 200,
+      "unit": "links",
+      "per_second": 12932.678938309158,
+      "relative": 0.12565622425822165
+    },
+    "wireless_jakes_fading": {
+      "seconds": 0.34916069998871535,
+      "runs": 7,
+      "units": 200000,
+      "unit": "link-steps",
+      "per_second": 572802.1510051499,
+      "relative": 2.837055695548784
+    },
+    "viewer_payload_build": {
+      "seconds": 0.0016907999997783918,
+      "runs": 50,
+      "units": 1,
+      "unit": "payloads",
+      "per_second": 591.4360067016011,
+      "relative": 0.016356333578802784
+    },
+    "viewer_frame_bundle": {
+      "seconds": 0.024501299998519244,
+      "runs": 9,
+      "units": 50,
+      "unit": "windows",
+      "per_second": 2040.7080441863,
+      "relative": 0.23701882892277398
+    },
+    "mesh_raycast_65k": {
+      "seconds": 0.03803080000216141,
+      "runs": 7,
+      "units": 65536,
+      "unit": "rays",
+      "per_second": 1723234.851653801,
+      "relative": 0.4094678429907003
+    },
+    "mesh_nearest_16k": {
+      "seconds": 0.00950120000197785,
+      "runs": 25,
+      "units": 16384,
+      "unit": "queries",
+      "per_second": 1724413.7579031459,
+      "relative": 0.10229697693480026
+    },
+    "gnss_receiver_epochs": {
+      "seconds": 0.07454279999365099,
+      "runs": 7,
+      "units": 1280,
+      "unit": "receiver-epochs",
+      "per_second": 17171.34317612192,
+      "relative": 0.7611876285951541
+    },
+    "radar_frames": {
+      "seconds": 0.014762699996936135,
+      "runs": 17,
+      "units": 480,
+      "unit": "beam-frames",
+      "per_second": 32514.377458027302,
+      "relative": 0.1582469529773305
+    },
+    "bemt_propeller_sweep": {
+      "seconds": 0.6975019000019529,
+      "runs": 3,
+      "units": 400,
+      "unit": "operating points",
+      "per_second": 573.4751403528508,
+      "relative": 6.897989154897018
+    },
+    "engine_mpc_hover": {
+      "seconds": 0.484642100003839,
+      "runs": 3,
+      "units": 400,
+      "unit": "physics steps",
+      "per_second": 825.3513262608252,
+      "relative": 4.6069910670542935
+    },
+    "eskf_step_n64": {
+      "seconds": 1.258398699996178,
+      "runs": 3,
+      "units": 12800,
+      "unit": "vehicle-steps",
+      "per_second": 10171.65704322396,
+      "relative": 12.698245815687434
+    },
+    "engine_eskf_flight": {
+      "seconds": 1.1106560999978683,
+      "runs": 3,
+      "units": 400,
+      "unit": "physics steps",
+      "per_second": 360.1474839968625,
+      "relative": 11.207405232148197
+    },
+    "planning_astar_64k": {
+      "seconds": 0.19441979999828618,
+      "runs": 3,
+      "units": 1,
+      "unit": "plans",
+      "per_second": 5.1435090459346995,
+      "relative": 1.9263236427791097
+    },
+    "planning_minsnap_20wp": {
+      "seconds": 0.032255499994789716,
+      "runs": 8,
+      "units": 1,
+      "unit": "fits",
+      "per_second": 31.002464700951208,
+      "relative": 0.3195895286908669
+    },
+    "qp_admm_60": {
+      "seconds": 0.16428280000400264,
+      "runs": 3,
+      "units": 100,
+      "unit": "solves",
+      "per_second": 608.7064500821971,
+      "relative": 1.5809861460213963
+    },
+    "gp_fit_predict_120": {
+      "seconds": 0.2626490999973612,
+      "runs": 3,
+      "units": 1,
+      "unit": "fits",
+      "per_second": 3.807361228384361,
+      "relative": 2.4163039667747896
+    },
+    "multiagent_hungarian_200": {
+      "seconds": 0.9303510999889113,
+      "runs": 3,
+      "units": 20,
+      "unit": "assignments",
+      "per_second": 21.49726055060114,
+      "relative": 8.94999514273541
+    },
+    "multiagent_cbba_6x12": {
+      "seconds": 0.13705960000515915,
+      "runs": 3,
+      "units": 1,
+      "unit": "allocations",
+      "per_second": 7.296096004675034,
+      "relative": 1.3185159391180956
+    },
+    "multiagent_lloyd_20x80": {
+      "seconds": 0.8121085000020685,
+      "runs": 3,
+      "units": 1600,
+      "unit": "site-iterations",
+      "per_second": 1970.180092925914,
+      "relative": 7.8124990989738
+    },
+    "multiagent_spacetime_4": {
+      "seconds": 0.35336850000021514,
+      "runs": 3,
+      "units": 1,
+      "unit": "plans",
+      "per_second": 2.829907023403023,
+      "relative": 3.399411640009152
+    },
+    "optical_flow_192x144": {
+      "seconds": 0.0063458000076934695,
+      "runs": 32,
+      "units": 27648,
+      "unit": "pixels",
+      "per_second": 4356897.4702134235,
+      "relative": 0.06110479338303328
+    },
+    "sobol_indices_ishigami": {
+      "seconds": 0.023041499996907078,
+      "runs": 10,
+      "units": 20480,
+      "unit": "evaluations",
+      "per_second": 888831.0224051856,
+      "relative": 0.19124846237786225
+    },
+    "swarm_env_8x8": {
+      "seconds": 0.26117289999092463,
+      "runs": 3,
+      "units": 3200,
+      "unit": "vehicle-steps",
+      "per_second": 12252.419757605767,
+      "relative": 2.442338192397341
+    }
+  }
+}

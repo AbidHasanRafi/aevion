@@ -1,0 +1,53 @@
+# A complete, commented scenario.  Validate with:  aevion validate examples/scenarios/forest_figure8.yaml
+# Run with:                                         aevion run examples/scenarios/forest_figure8.yaml --out out --open
+schema_version: 2
+name: forest_figure8
+description: Figure-eight through a forest in turbulence, with a GPS outage in the middle of the flight.
+seed: 7
+duration: 20.0
+
+engine:
+  dt: 0.005             # physics step [s]
+  integrator: rk4       # euler | semi_implicit | midpoint | rk4
+  kernel: auto          # auto | reference | numba
+
+world:
+  type: forest          # see: aevion registry worlds
+  n_trees: 40
+  half_extent: 25
+
+wind:
+  type: composite
+  models:
+    - {type: constant, velocity: [2.0, 1.0, 0.0]}
+    - {type: dryden, w20: 5.0, severity: 1.0}
+
+vehicle:
+  model: generic_1kg    # see: aevion vehicles
+  count: 1
+
+controller: {type: geometric, ki_pos: 3.0}
+
+trajectory: {type: figure8, center: [0, 0, 3.0], size: 3.0, period: 9.0}
+
+sensors:
+  - imu
+  - gps
+  - baro
+  - mag
+  - {type: lidar, name: lidar, channels: 8, samples: 180, record: true}
+
+estimator: {type: mahony_kf, handover_s: 6.0}     # fly on estimates after 6 s
+
+faults:
+  - {type: gps_outage, t_start: 10.0, t_end: 14.0}
+  - {type: sensor_noise_scale, t_start: 15.0, sensor: imu, factor: 4.0}
+
+health:
+  on_diverge: raise
+  max_speed: 40.0
+
+logging:
+  record_every: 4       # an archive row every 4 physics steps (50 Hz)
+  sensors: [imu]
+  mode: memory          # memory | stream (stream needs logging.path)

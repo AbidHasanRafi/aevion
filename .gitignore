@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+*.aev
+.numba_cache/
+
+# generated documentation (tools/gen_site.py)
+docs/api/
+docs/assets/
+docs/gallery/
+docs/cli.md
+docs/guide.md
+docs/index.md
+site/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+.mypy_cache/

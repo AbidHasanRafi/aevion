@@ -1,0 +1,37 @@
+# {{dist_name}}
+
+{{description}}
+
+An [Aevion](https://pypi.org/project/aevion/) plugin. After `pip install -e ".[test]"` the components below are
+available in every Aevion configuration, with no code changes on the user's side:
+
+| Registry | Name | What it does |
+| --- | --- | --- |
+| sensors | `{{component}}` | {{class_name}}: a downward range sensor (altitude above ground with noise and a range limit) |
+| hooks | `{{component}}_log` | prints vehicle 0's altitude once per simulated second |
+
+```yaml
+schema_version: 2
+duration: 5
+sensors:
+  - type: {{component}}
+    params: {max_range: 8.0}
+hooks:
+  - type: {{component}}_log
+```
+
+```bash
+aevion plugins          # shows this plugin and whether it loaded
+aevion registry sensors # lists '{{component}}' with source '{{package}}'
+aevion run config.yaml
+```
+
+## Develop
+
+```bash
+pip install -e ".[test]"
+pytest
+```
+
+The plugin mechanism is described in Aevion's `docs/plugins.md`. Plugins run with the user's privileges: only install
+plugins you trust (`AEVION_DISABLE_PLUGINS=1` skips plugin loading).

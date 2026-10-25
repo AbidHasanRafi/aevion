@@ -1,0 +1,170 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aevion"
+version = "0.1.0"
+description = "CPU-first and GPU-ready UAV simulation with ML/DL integration, sensors, wireless links and research-grade figures."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Aevion contributors" }]
+keywords = ["uav", "drone", "quadrotor", "simulation", "reinforcement-learning", "lidar", "6g", "pytorch"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+dependencies = ["numpy>=1.24", "scipy>=1.10"]
+
+[project.urls]
+Documentation = "https://aevion.readthedocs.io"
+Source = "https://github.com/aevion/aevion"
+Changelog = "https://github.com/aevion/aevion/blob/main/DOCUMENTATION.md"
+
+[project.optional-dependencies]
+fast = ["numba>=0.58"]
+torch = ["torch>=2.1"]
+gym = ["gymnasium>=0.29"]
+viz = ["matplotlib>=3.7"]
+hdf5 = ["h5py>=3.8"]
+yaml = ["pyyaml>=6"]
+parquet = ["pyarrow>=14"]
+ml = ["gymnasium>=0.29", "torch>=2.1", "stable-baselines3>=2.2"]
+all = ["numba>=0.58", "torch>=2.1", "gymnasium>=0.29", "matplotlib>=3.7", "h5py>=3.8", "pyyaml>=6", "pyarrow>=14"]
+test = [
+    "pytest>=7", "pytest-cov>=4", "pytest-timeout>=2", "pytest-xdist>=3", "hypothesis>=6.90", "vermin>=1.6", "tomli>=2; python_version<'3.11'",
+    "numba>=0.58", "gymnasium>=0.29", "matplotlib>=3.7", "pyyaml>=6", "jsonschema>=4",
+]
+dev = [
+    "aevion[test]", "aevion[docs]", "ruff>=0.5", "mypy>=1.10", "bandit>=1.7", "pip-audit>=2.7", "build>=1.0", "twine>=5", "pre-commit>=3",
+]
+docs = ["mkdocs>=1.6", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
+
+[project.scripts]
+aevion = "aevion.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aevion = ["viewer/web/index.html", "viewer/web/css/*.css", "viewer/web/src/**/*.js", "viewer/web/vendor/**/*", "py.typed", "templates/**/*"]
+
+# --------------------------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --strict-config -p no:cacheprovider"
+timeout = 600
+filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+    "slow: long-running test (deselect with -m 'not slow')",
+    "gpu: needs a CUDA device",
+    "network: needs network access (e.g. three.js CDN)",
+    "golden: compares against stored golden files/images",
+    "security: security-hardening tests",
+]
+
+# ------------------------------------------------------------------------------------------- coverage
+[tool.coverage.run]
+branch = true
+source = ["aevion"]
+parallel = true
+omit = [
+    "*/aevion/dynamics/fast.py",   # Numba-compiled: executed as machine code, invisible to coverage (guarded by parity tests)
+    "*/aevion/sensors/raycast.py", # contains a Numba kernel; Python parts are covered through the sensors tests
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+]
+
+# ---------------------------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 150
+target-version = "py310"
+extend-exclude = ["build", "dist", "docs/assets"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "C4", "SIM", "UP", "RUF", "PIE", "S", "T20"]
+ignore = [
+    "E501",    # line length is handled by the formatter
+    "C408",    # dict(...)/list(...) calls are used deliberately for readability
+    "UP006", "UP007", "UP035", "UP037", "UP045",  # typing.Optional/List style is kept: the config schema introspects typing.Union
+    "RUF001", "RUF002", "RUF003",  # math symbols (×, ², Δ, µ) in docs/comments are intentional
+    "RUF005", "RUF012", "RUF059", "RUF022",
+    "B905",    # zip() strictness is not meaningful for our numeric loops
+    "SIM108", "SIM105", "SIM102", "SIM117",
+    "S101",    # asserts are fine (tests and internal invariants)
+    "S311",    # random is used for simulation noise, not cryptography
+    "S110", "S112",  # best-effort try/except-pass in diagnostics and cleanup
+    "S603", "S607",  # the git probe in provenance runs a fixed, trusted command
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "T20", "B011", "B017", "E731", "E741", "RUF015"]
+"examples/**" = ["T20", "S", "E402", "E741"]
+"tools/**" = ["T20", "S"]
+"benchmarks/**" = ["T20", "S"]
+"src/aevion/cli.py" = ["T20"]
+"src/aevion/engine/hooks.py" = ["T20"]
+"src/aevion/viewer/{live,server,video}.py" = ["T20"]   # console feedback of the serve/live/render commands
+"src/aevion/analysis/**" = ["E741"]
+"src/aevion/**" = ["E741"]   # physics notation (l, I, O) is deliberate
+
+[tool.ruff.lint.isort]
+known-first-party = ["aevion"]
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+# ---------------------------------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+# ignores for optional libraries (numba, torch) are "unused" when those are not installed, so this cannot be a gate
+warn_unused_ignores = false
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+show_error_codes = true
+pretty = false
+exclude = ["build/", "tests/", "examples/"]
+
+# the foundation modules are held to a strict standard; numeric/legacy modules are checked more leniently
+[[tool.mypy.overrides]]
+module = ["aevion.config.*", "aevion.registry.*", "aevion.engine.*", "aevion.health.*", "aevion.frames.*", "aevion.datasets.*", "aevion.errors", "aevion.safety", "aevion.deprecation"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["aevion.core.backend", "aevion.dynamics.*", "aevion.sensors.*", "aevion.analysis.*", "aevion.experiments.*", "aevion.envs.*", "aevion.control.*", "aevion.estimation.*", "aevion.wireless.*", "aevion.multiagent.*", "aevion.environments.*", "aevion.vehicles.*", "aevion.viewer.*", "aevion.scenario", "aevion.metrics", "aevion.cli"]
+disallow_untyped_defs = false
+
+# optional GeoTIFF reader: newer releases use syntax mypy rejects under python_version = "3.10"
+[[tool.mypy.overrides]]
+module = ["tifffile", "tifffile.*"]
+follow_imports = "skip"
+
+[tool.bandit]
+exclude_dirs = ["tests", "examples", "tools", "benchmarks"]
+# B404/B603/B607: the only subprocess use is a fixed-argv `git` query for provenance (no shell, no user input)
+# B101: asserts narrow Optional types for mypy (never used for validation); B110/B112: best-effort cleanup/optional-dependency probes
+skips = ["B101", "B110", "B112", "B404", "B603", "B607"]

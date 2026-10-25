@@ -1,0 +1,35 @@
+# A quadrotor orbiting a small block of buildings loaded from GeoJSON, at a real place and time, with weather, a flying obstacle,
+# a no-fly zone, an urban wake wind and the extended sensors.
+# Validate with:  aevion validate examples/scenarios/urban_environment.yaml
+# Run with:       aevion run examples/scenarios/urban_environment.yaml --out out --open
+schema_version: 2
+name: urban_environment
+description: Orbit over a small block of buildings in Zurich with a bird-like obstacle, a mast keep-out zone and GNSS in the canyons.
+seed: 7
+duration: 20.0
+
+world:
+  type: scene
+  params:
+    buildings: {file: old_town.geojson, default_height: 10, as: mesh}
+
+environment:
+  origin: {lat: 47.3769, lon: 8.5417, alt: 408.0}
+  utc: "2026-06-21T07:30:00Z"
+  weather: {preset: overcast, visibility_m: 8000}
+  actors:
+    - {type: circular, params: {center: [0, 0, 22], path_radius: 20, omega: 0.35, radius: 0.5}}
+  geofences:
+    - {name: area, kind: inclusion, zone: {type: cylinder, center: [0, 0], radius: 90, z_max: 80}}
+    - {name: crane, kind: exclusion, margin: 2.0, zone: {type: cylinder, center: [0, 55], radius: 4, z_max: 60}}
+
+wind: {type: urban, speed_ref: 5.0, height_ref: 10.0, z0: 0.6, direction_deg: 270}
+
+trajectory: {type: circle, center: [0, 0, 25], radius: 28, omega: 0.25}
+
+sensors:
+  - imu
+  - mag
+  - baro
+  - {type: gnss, name: gps, params: {rate: 5.0}, record: true}
+  - {type: radar, name: radar, params: {rate: 10.0, ground_clutter: false}, record: true}

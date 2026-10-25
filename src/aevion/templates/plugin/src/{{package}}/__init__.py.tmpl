@@ -1,0 +1,15 @@
+"""{{description}}"""
+
+from .components import {{class_name}}, {{class_name}}Log
+
+__all__ = ["{{class_name}}", "{{class_name}}Log", "register"]
+__version__ = "0.1.0"
+
+
+def register(registries):
+    """Entry point declared in pyproject.toml (group ``aevion.plugins``). Aevion calls it once at import time.
+
+    ``source=`` labels the components in ``aevion registry`` and lets untrusted-run limits recognise plugin code.
+    """
+    registries.sensors.register("{{component}}", {{class_name}}, source="{{package}}", doc="downward range sensor with noise and a range limit")
+    registries.hooks.register("{{component}}_log", {{class_name}}Log, source="{{package}}", doc="print the altitude once per simulated second")

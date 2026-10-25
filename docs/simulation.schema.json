@@ -1,0 +1,894 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aevion simulation configuration",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "default": 2
+    },
+    "name": {
+      "type": "string",
+      "default": "simulation"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0.0,
+      "default": 10.0
+    },
+    "engine": {
+      "$ref": "#/$defs/EngineConfig"
+    },
+    "world": {
+      "$ref": "#/$defs/WorldConfig"
+    },
+    "wind": {
+      "$ref": "#/$defs/WindConfig"
+    },
+    "vehicle": {
+      "$ref": "#/$defs/VehicleConfig"
+    },
+    "controller": {
+      "$ref": "#/$defs/ControllerConfig"
+    },
+    "trajectory": {
+      "$ref": "#/$defs/TrajectoryConfig"
+    },
+    "sensors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SensorConfig"
+      }
+    },
+    "estimator": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EstimatorConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "network": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NetworkConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "swarm": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SwarmConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "faults": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FaultConfig"
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HookConfig"
+      }
+    },
+    "health": {
+      "$ref": "#/$defs/HealthConfig"
+    },
+    "environment": {
+      "$ref": "#/$defs/EnvironmentConfig"
+    },
+    "logging": {
+      "$ref": "#/$defs/LoggingConfig"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Everything needed to reproduce a simulation.",
+  "$defs": {
+    "EngineConfig": {
+      "type": "object",
+      "properties": {
+        "dt": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "maximum": 0.05,
+          "description": "physics step [s]",
+          "default": 0.005
+        },
+        "integrator": {
+          "enum": [
+            "euler",
+            "semi_implicit",
+            "midpoint",
+            "rk4"
+          ],
+          "default": "rk4"
+        },
+        "backend": {
+          "type": "string",
+          "default": "numpy"
+        },
+        "dtype": {
+          "anyOf": [
+            {
+              "enum": [
+                "float32",
+                "float64"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kernel": {
+          "enum": [
+            "auto",
+            "reference",
+            "numba"
+          ],
+          "default": "auto"
+        },
+        "verify_kernel": {
+          "type": "boolean",
+          "default": true
+        },
+        "controller_rate_hz": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "exclusiveMinimum": 0.0,
+          "description": "controller rate; default = physics rate [Hz]",
+          "default": null
+        }
+      },
+      "additionalProperties": false,
+      "description": "EngineConfig(dt: 'float' = 0.005, integrator: \"Literal['euler', 'semi_implicit', 'midpoint', 'rk4']\" = 'rk4', backend: 'str' = 'numpy', dtype: \"Optional[Literal['float32', 'float64']]\" = None, kernel: \"Literal['auto', 'reference', 'numba']\" = 'auto', verify_kernel: 'bool' = True, controller_rate_hz: 'Optional[float]' = None)"
+    },
+    "WorldConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "empty"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "A procedural world (``forest``, ``city``, \u2026) or a full serialised world (``World.to_dict()``)."
+    },
+    "WindConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "none"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "WindConfig(type: 'str' = 'none', params: 'Dict[str, Any]' = <factory>)"
+    },
+    "VehicleConfig": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          ],
+          "default": "generic_1kg"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "formation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FormationConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "initial": {
+          "$ref": "#/$defs/InitialConfig"
+        }
+      },
+      "additionalProperties": false,
+      "description": "VehicleConfig(model: 'Union[str, Dict[str, Any]]' = 'generic_1kg', count: 'int' = 1, formation: 'Optional[FormationConfig]' = None, overrides: 'Dict[str, Any]' = <factory>, initial: 'InitialConfig' = <factory>)"
+    },
+    "FormationConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "line"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "FormationConfig(type: 'str' = 'line', params: 'Dict[str, Any]' = <factory>)"
+    },
+    "InitialConfig": {
+      "type": "object",
+      "properties": {
+        "pos": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "vel": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "euler": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "roll, pitch, yaw [rad]",
+          "default": null
+        },
+        "omega": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "soc": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "initial battery state of charge",
+          "default": 1.0
+        }
+      },
+      "additionalProperties": false,
+      "description": "InitialConfig(pos: 'Optional[Tuple[float, float, float]]' = None, vel: 'Optional[Tuple[float, float, float]]' = None, euler: 'Optional[Tuple[float, float, float]]' = None, omega: 'Optional[Tuple[float, float, float]]' = None, soc: 'float' = 1.0)"
+    },
+    "ControllerConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "geometric"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "ControllerConfig(type: 'str' = 'geometric', params: 'Dict[str, Any]' = <factory>)"
+    },
+    "TrajectoryConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "hover"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "TrajectoryConfig(type: 'str' = 'hover', params: 'Dict[str, Any]' = <factory>)"
+    },
+    "SensorConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "record": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "SensorConfig(type: 'str' = '', params: 'Dict[str, Any]' = <factory>, name: 'Optional[str]' = None, record: 'bool' = False)"
+    },
+    "EstimatorConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "mahony_kf"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "handover_s": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "fly the controller on truth until the filter has converged [s]",
+          "default": 6.0
+        }
+      },
+      "additionalProperties": false,
+      "description": "EstimatorConfig(type: 'str' = 'mahony_kf', params: 'Dict[str, Any]' = <factory>, handover_s: 'float' = 6.0)"
+    },
+    "NetworkConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "cellular"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "rate_hz": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "exclusiveMinimum": 0,
+          "description": "evaluation rate; default = recording rate [Hz]",
+          "default": null
+        }
+      },
+      "additionalProperties": false,
+      "description": "NetworkConfig(type: 'str' = 'cellular', params: 'Dict[str, Any]' = <factory>, rate_hz: 'Optional[float]' = None)"
+    },
+    "SwarmConfig": {
+      "type": "object",
+      "properties": {
+        "avoid_radius": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 1.0
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.8
+        },
+        "max_push": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 1.5
+        },
+        "comm": {
+          "$ref": "#/$defs/CommModelConfig"
+        },
+        "rate_hz": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "exclusiveMinimum": 0.0,
+          "description": "coordination rate; default = every physics step [Hz]",
+          "default": null
+        },
+        "laws": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SwarmLawConfig"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "SwarmConfig(avoid_radius: 'float' = 1.0, gain: 'float' = 0.8, max_push: 'float' = 1.5, comm: 'CommModelConfig' = <factory>, rate_hz: 'Optional[float]' = None, laws: 'List[SwarmLawConfig]' = <factory>)"
+    },
+    "CommModelConfig": {
+      "type": "object",
+      "properties": {
+        "delay_s": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.0
+        },
+        "loss": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "packet-loss probability per link",
+          "default": 0.0
+        },
+        "range_m": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": Infinity
+        },
+        "rate_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 20.0
+        }
+      },
+      "additionalProperties": false,
+      "description": "CommModelConfig(delay_s: 'float' = 0.0, loss: 'float' = 0.0, range_m: 'float' = inf, rate_hz: 'float' = 20.0)"
+    },
+    "SwarmLawConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "A cooperative law (registry: swarm_laws) acting on the references through the lossy inter-agent link."
+    },
+    "FaultConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "t_start": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.0
+        },
+        "t_end": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "minimum": 0.0,
+          "default": null
+        },
+        "vehicle": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "minimum": 0,
+          "description": "vehicle index (omit = all)",
+          "default": null
+        }
+      },
+      "additionalProperties": false,
+      "description": "A fault active during ``[t_start, t_end)`` (``t_end`` omitted = permanent)."
+    },
+    "HookConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "HookConfig(type: 'str' = '', params: 'Dict[str, Any]' = <factory>)"
+    },
+    "HealthConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "on_diverge": {
+          "enum": [
+            "raise",
+            "stop",
+            "warn"
+          ],
+          "default": "raise"
+        },
+        "check_every": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "run checks every N physics steps",
+          "default": 1
+        },
+        "max_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 200.0
+        },
+        "max_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "description": "maximum body rate [rad/s]",
+          "default": 500.0
+        },
+        "max_altitude": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 20000.0
+        },
+        "quat_tol": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "default": 1e-06
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComponentConfig"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "HealthConfig(enabled: 'bool' = True, on_diverge: \"Literal['raise', 'stop', 'warn']\" = 'raise', check_every: 'int' = 1, max_speed: 'float' = 200.0, max_rate: 'float' = 500.0, max_altitude: 'float' = 20000.0, quat_tol: 'float' = 1e-06, checks: 'List[ComponentConfig]' = <factory>)"
+    },
+    "ComponentConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "A named registry component plus its parameters."
+    },
+    "EnvironmentConfig": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OriginConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ISO-8601 UTC time of t = 0 (sun position, GNSS satellite geometry)",
+          "default": null
+        },
+        "weather": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "{preset: clear|overcast|rain|heavy_rain|fog|hot|cold|storm} and/or Weather fields",
+          "default": null
+        },
+        "actors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ActorConfig"
+          }
+        },
+        "geofences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GeofenceConfig"
+          }
+        },
+        "geofence_stop": {
+          "type": "boolean",
+          "description": "end the run at the first geofence breach (needs health.on_diverge: stop)",
+          "default": false
+        },
+        "gravity": {
+          "anyOf": [
+            {
+              "enum": [
+                "constant",
+                "altitude",
+                "wgs84"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "gravity model; wgs84 uses the latitude and height of the origin (Somigliana + free-air gradient)",
+          "default": null
+        }
+      },
+      "additionalProperties": false,
+      "description": "Earth, weather, moving obstacles and geofences, applied on top of whatever ``world`` builds."
+    },
+    "OriginConfig": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90.0,
+          "maximum": 90.0,
+          "default": 47.3769
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180.0,
+          "maximum": 180.0,
+          "default": 8.5417
+        },
+        "alt": {
+          "type": "number",
+          "description": "ellipsoidal height of the world's z = 0 [m]",
+          "default": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "description": "Where the world's (0, 0, 0) is on Earth: anchors the ENU frame for GNSS, the magnetic field, the sun and map data."
+    },
+    "ActorConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "linear"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "A moving obstacle (registry: actors): ``linear``, ``circular``, ``waypoints``, ``bouncing`` or ``random_walk``."
+    },
+    "GeofenceConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "kind": {
+          "enum": [
+            "inclusion",
+            "exclusion"
+          ],
+          "default": "exclusion"
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.0
+        },
+        "zone": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "additionalProperties": false,
+      "description": "A geofence: ``zone`` is ``{type: cylinder|box|sphere|polygon|altitude, ...}`` (see ``aevion.environments.geofence``)."
+    },
+    "LoggingConfig": {
+      "type": "object",
+      "properties": {
+        "record_every": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "record every N physics steps",
+          "default": 4
+        },
+        "rate_hz": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "exclusiveMinimum": 0.0,
+          "description": "record rate; overrides record_every [Hz]",
+          "default": null
+        },
+        "mode": {
+          "enum": [
+            "memory",
+            "stream"
+          ],
+          "default": "memory"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "chunk_steps": {
+          "type": "integer",
+          "minimum": 16,
+          "default": 512
+        },
+        "sensors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "vehicles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "provenance": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "description": "LoggingConfig(record_every: 'int' = 4, rate_hz: 'Optional[float]' = None, mode: \"Literal['memory', 'stream']\" = 'memory', path: 'Optional[str]' = None, chunk_steps: 'int' = 512, sensors: 'List[str]' = <factory>, channels: 'Optional[List[str]]' = None, vehicles: 'Optional[List[int]]' = None, provenance: 'bool' = True)"
+    }
+  }
+}

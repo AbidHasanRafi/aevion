@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aevion viewer</title>
+<!--aevion:dev-->
+<link rel="stylesheet" href="css/aevion.css">
+<script type="importmap">
+{"imports": {
+  "three": "./vendor/three/three.module.min.js",
+  "three/addons/controls/OrbitControls.js": "./vendor/three/OrbitControls.js",
+  "three/addons/loaders/GLTFLoader.js": "./vendor/three/GLTFLoader.js",
+  "three/addons/utils/BufferGeometryUtils.js": "./vendor/three/BufferGeometryUtils.js"
+}}
+</script>
+<script>window.__AEVION_BOOT__ = Object.assign({}, /*AEVION_BOOT*/{}, Object.fromEntries(new URLSearchParams(location.search)));</script>
+<script type="module" src="src/app.js"></script>
+<!--/aevion:dev-->
+</head>
+<body>
+<div id="app">
+  <div id="stage-wrap"><canvas id="stage"></canvas></div>
+  <header id="title"></header>
+  <section id="hud" aria-label="Vehicle readout"></section>
+  <div id="banner" hidden></div>
+  <section id="charts" aria-label="Time series"></section>
+  <footer id="timeline"></footer>
+  <button id="drawer-toggle" title="Layers and settings (D)" aria-label="Open settings">&#9776;</button>
+  <aside id="drawer-wrap" aria-label="Settings"><div id="drawer"></div></aside>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <noscript>The Aevion viewer needs JavaScript.</noscript>
+</div>
+</body>
+</html>
