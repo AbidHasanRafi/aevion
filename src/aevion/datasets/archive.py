@@ -125,7 +125,7 @@ class RunArchive:
 
     @property
     def config(self) -> dict:
-        """The v2 configuration dict, if recorded (``meta['config']``)."""
+        """The configuration dict, if recorded (``meta['config']``)."""
         return self.meta.get("config", {})
 
     @property

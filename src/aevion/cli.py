@@ -114,7 +114,7 @@ def _cmd_validate(args):
                 cfg = load_config_checked(p, limits)
             else:
                 cfg = load_config(p)
-            print(f"OK   {p}  (v{cfg.schema_version}, hash {config_hash(cfg)}, {cfg.n_steps} steps, {cfg.vehicle.count} vehicle(s))")
+            print(f"OK   {p}  (schema {cfg.schema_version}, hash {config_hash(cfg)}, {cfg.n_steps} steps, {cfg.vehicle.count} vehicle(s))")
         except (ConfigError, ResourceLimitError) as e:
             bad += 1
             print(f"FAIL {p}\n{e}", file=sys.stderr)
@@ -283,7 +283,7 @@ def _cmd_run(args):
         limits = limits.replace(output_root=out.resolve())
         cfg = load_config_checked(args.scenario, limits)
     else:
-        cfg = load_config(args.scenario)  # YAML/JSON, schema v2 or legacy scenario (migrated)
+        cfg = load_config(args.scenario)  # YAML/JSON, current schema or legacy scenario (migrated)
     if args.backend:
         cfg.engine.backend = args.backend
     if args.stream:
@@ -646,7 +646,10 @@ def _out_flags(p):
 
 
 def build_parser():
+    from . import __version__
+
     ap = argparse.ArgumentParser(prog="aevion", description="Aevion: UAV simulation for research")
+    ap.add_argument("--version", action="version", version=f"aevion {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("info", help="versions, accelerators and registered components").set_defaults(fn=_cmd_info)
@@ -688,7 +691,7 @@ def build_parser():
     _out_flags(d)
     d.set_defaults(fn=_cmd_demo)
 
-    r = sub.add_parser("run", help="run a configuration file (YAML/JSON; schema v2 or legacy scenario)")
+    r = sub.add_parser("run", help="run a configuration file (YAML/JSON; current schema or legacy scenario)")
     r.add_argument("scenario")
     r.add_argument("--out", default="aevion_run")
     r.add_argument("--backend")

@@ -20,6 +20,7 @@ import { Playback } from './core/playback.js';
 import { Settings, safeStorage, autoQuality } from './core/settings.js';
 import { Emitter, parseHash, buildHash, clamp } from './core/util.js';
 import { $, toast } from './ui/dom.js';
+import { icon } from './ui/icons.js';
 import { Hud } from './ui/hud.js';
 import { ChartDock } from './ui/charts.js';
 import { TimelineBar } from './ui/timeline.js';
@@ -248,7 +249,11 @@ export async function boot(config = globalThis.__AEVION_BOOT__ || {}) {
       '?': () => { help.hidden = !help.hidden; }, Escape: () => { help.hidden = true; },
     },
   });
-  $('#drawer-toggle').addEventListener('click', () => drawer.classList.toggle('open'));
+  const drawerBtn = $('#drawer-toggle');
+  drawerBtn.replaceChildren(icon('sidebar', { size: 18 })); drawerBtn.setAttribute('aria-controls', 'drawer-wrap');
+  const syncDrawer = () => { const open = drawer.classList.contains('open'); drawerBtn.setAttribute('aria-expanded', String(open)); drawerBtn.classList.toggle('on', open); };
+  new MutationObserver(syncDrawer).observe(drawer, { attributes: true, attributeFilter: ['class'] }); syncDrawer();
+  drawerBtn.addEventListener('click', () => drawer.classList.toggle('open'));
   if (hash.ui === '0') document.body.classList.add('hide-ui');
   if (hash.focus) { fleet.setFocus(clamp(+hash.focus, 0, N - 1)); hud.vsel.value = fleet.focus; }
   if (hash.t !== undefined) playback.seek(playback.t0 + +hash.t);

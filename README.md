@@ -68,7 +68,7 @@ The same code runs on a GPU: `Multirotor("generic_1kg", n=100_000, backend="cuda
 ### Declarative configuration, engine, faults, hooks
 
 ```yaml
-schema_version: 2
+schema_version: 1
 name: gps_outage_demo
 duration: 20
 world: {type: forest, n_trees: 30}
@@ -188,7 +188,7 @@ drawing quantitative real-world conclusions. Each subsystem's fidelity level is 
 
 ```text
 src/aevion/
-  config/        typed configuration schema (v2), validation, migration, JSON Schema
+  config/        typed configuration schema, validation, migration, JSON Schema
   registry/      component registries + plugin discovery
   engine/        Simulation, scheduler, events, hooks, faults, RNG streams
   health/        divergence watchdogs

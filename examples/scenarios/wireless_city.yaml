@@ -1,7 +1,7 @@
 # A cellular-connected UAV in a city: geometric line-of-sight from ray casting, 3GPP UMa path loss, A3 handover, GNSS jamming.
 # Validate with:  aevion validate examples/scenarios/wireless_city.yaml
 # Run with:       aevion run examples/scenarios/wireless_city.yaml --out out --open
-schema_version: 2
+schema_version: 1
 name: wireless_city
 description: Orbit over a city between two macro sites, with a GNSS jammer switched on at t = 10 s.
 seed: 5

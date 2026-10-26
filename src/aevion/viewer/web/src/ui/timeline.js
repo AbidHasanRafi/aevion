@@ -1,33 +1,49 @@
-// Timeline bar: scrubber with event ticks, outage bands, a zoomable view window, and the transport controls.
+// Transport bar: play controls, a scrubber with event ticks, outage bands and a zoomable view window, and the camera selector.
 
-import { h, checkbox } from './dom.js';
+import { h, iconButton, segmented, select } from './dom.js';
+import { icon } from './icons.js';
 import { SPEEDS } from '../core/playback.js';
 import { fmtTime, themeColors } from '../core/util.js';
 import { runs } from '../data/decimate.js';
 
-const EVENT_COLORS = { handover: '#4de8ff', rlf: '#ff4d4d', 'fault.start': '#ff9f43', 'fault.end': '#5fe0a0' };
+const EVENT_TOKEN = { handover: 'accent', rlf: 'bad', collision: 'bad', 'fault.start': 'warn', 'fault.end': 'good' };
+const CAMERAS = [['orbit', 'Orbit'], ['chase', 'Chase'], ['top', 'Top'], ['fpv', 'FPV']];
+
+/** Filled capsule from x0 to x1 centred on y with thickness `t`. */
+function capsule(g, x0, x1, y, t) {
+  if (x1 - x0 < 0.5) return;
+  const r = Math.min(t / 2, (x1 - x0) / 2); g.beginPath(); g.moveTo(x0 + r, y - t / 2); g.lineTo(x1 - r, y - t / 2); g.arc(x1 - r, y, r, -Math.PI / 2, Math.PI / 2); g.lineTo(x0 + r, y + t / 2); g.arc(x0 + r, y, r, Math.PI / 2, -Math.PI / 2); g.closePath(); g.fill();
+}
 
 export class TimelineBar {
   constructor(ctx, root, { onCamera, onScreenshot } = {}) {
     this.ctx = ctx; this.root = root; this.view = null;
     const pb = ctx.playback;
-    this.track = h('div', { class: 'tl-track' });
-    this.canvas = h('canvas', { class: 'tl-canvas' });
-    this.track.append(this.canvas);
+    this.canvas = h('canvas', { class: 'tl-canvas', role: 'slider', 'aria-label': 'Timeline', tabindex: '0' });
+    this.track = h('div', { class: 'tl-track' }, this.canvas);
     this.time = h('span', { id: 'time' }, '0.00 / 0.00 s');
-    this.playBtn = h('button', { id: 'play', onclick: () => pb.toggle(), title: 'Space' }, '❚❚ Pause');
-    this.speedSel = h('select', { id: 'speed', onchange: (e) => pb.setSpeed(+e.target.value) }, SPEEDS.map((s) => h('option', { value: s }, `${s}×`)));
-    this.speedSel.value = String(pb.speed);
-    this.liveBtn = h('button', { id: 'golive', hidden: !ctx.source.live, onclick: () => { pb.followLive = !pb.followLive; this.refresh(); }, title: 'Follow the newest data' }, '● LIVE');
-    this.camBtns = ['orbit', 'chase', 'top', 'fpv'].map((m) => h('button', { 'data-cam': m, onclick: () => onCamera && onCamera(m) }, m[0].toUpperCase() + m.slice(1)));
-    const row = h('div', { id: 'ctl' },
-      this.playBtn, h('button', { id: 'restart', title: 'Restart (R)', onclick: () => pb.seek(pb.t0) }, '⟲'), this.speedSel,
-      checkbox('loop', pb.loop, (v) => { pb.loop = v; }), this.liveBtn,
-      h('div', { class: 'sep' }), ...this.camBtns, h('div', { class: 'sep' }),
-      h('button', { title: 'Screenshot (S)', onclick: () => onScreenshot && onScreenshot() }, '📷'), this.time);
-    root.append(this.track, row);
-    this._bind(); pb.on('playing', (p) => { this.playBtn.textContent = p ? '❚❚ Pause' : '▶ Play'; }); pb.on('speed', (s) => { this.speedSel.value = String(s); });
+    this.restartBtn = iconButton('restart', 'Restart (R)', () => pb.seek(pb.t0), { id: 'restart' });
+    this.playBtn = h('button', { id: 'play', type: 'button', onclick: () => pb.toggle() });
+    this._setPlaying(pb.playing);
+    this.speedSel = select(SPEEDS.map((s) => [s, `${s}×`]), pb.speed, (v) => pb.setSpeed(+v));
+    this.speedSel.id = 'speed'; this.speedSel.title = 'Playback speed'; this.speedSel.setAttribute('aria-label', 'Playback speed');
+    this.loopBtn = iconButton('loop', 'Loop', () => { pb.loop = !pb.loop; this._setLoop(); }); this._setLoop();
+    this.liveBtn = h('button', { id: 'golive', type: 'button', hidden: !ctx.source.live, title: 'Follow the newest data', onclick: () => { pb.followLive = !pb.followLive; this.refresh(); } }, 'Live');
+    this.cam = segmented(CAMERAS, null, (m) => onCamera && onCamera(m), 'Camera');
+    this.camBtns = this.cam.btns;
+    root.append(h('div', { id: 'ctl' },
+      h('div', { class: 'cluster' }, this.restartBtn, this.playBtn), this.track, this.time, this.speedSel, h('div', { class: 'cluster' }, this.loopBtn, this.liveBtn),
+      h('div', { class: 'sep' }), this.cam.el, iconButton('camera', 'Screenshot (S)', () => onScreenshot && onScreenshot())));
+    this._bind();
+    pb.on('playing', (p) => this._setPlaying(p)); pb.on('speed', (s) => { this.speedSel.value = String(s); });
   }
+
+  _setPlaying(p) {
+    this.playBtn.replaceChildren(icon(p ? 'pause' : 'play', { size: 18 }));
+    const label = p ? 'Pause (Space)' : 'Play (Space)'; this.playBtn.title = label; this.playBtn.setAttribute('aria-label', label);
+  }
+
+  _setLoop() { const on = !!this.ctx.playback.loop; this.loopBtn.classList.toggle('on', on); this.loopBtn.setAttribute('aria-pressed', String(on)); }
 
   _window() { const s = this.ctx.frames.overview; return this.view || [s.t0, Math.max(s.t1, s.t0 + 1e-6)]; }
 
@@ -48,19 +64,28 @@ export class TimelineBar {
 
   setView(v) { this.view = v; this.ctx.events.emit('view', v); }
 
-  setCamActive(mode) { this.camBtns.forEach((b) => b.classList.toggle('on', b.dataset.cam === mode)); }
-  refresh() { this.liveBtn.classList.toggle('on', this.ctx.playback.followLive); }
+  setCamActive(mode) { this.cam.set(mode); }
+  refresh() { const on = this.ctx.playback.followLive; this.liveBtn.classList.toggle('on', on); this.liveBtn.setAttribute('aria-pressed', String(on)); }
 
   draw() {
     const { ctx } = this, s = ctx.frames.overview, pb = ctx.playback, cv = this.canvas, w = cv.clientWidth, hgt = cv.clientHeight; if (!w || !hgt) return;
     const dpr = Math.min(globalThis.devicePixelRatio || 1, 2); if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr); }
-    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, hgt);
-    const [t0, t1] = this._window(), X = (t) => ((t - t0) / (t1 - t0)) * w, mid = hgt / 2;
-    g.fillStyle = 'rgba(128,140,170,.25)'; g.fillRect(0, mid - 3, w, 6);
-    const full = pb.t1 > pb.t0 ? [X(pb.t0), X(pb.t1)] : [0, 0]; g.fillStyle = 'rgba(92,200,255,.28)'; g.fillRect(Math.max(full[0], 0), mid - 3, Math.max(Math.min(full[1], w) - Math.max(full[0], 0), 0), 6);
-    if (s.has('x:link_outage')) { const o = s.series('x:link_outage', ctx.fleet.focus); g.fillStyle = 'rgba(255,77,77,.7)'; for (const [a, b] of runs((i) => o[i] > 0.5, s.T)) g.fillRect(X(s.t[a]), mid - 3, Math.max(X(s.t[Math.min(b, s.T - 1)]) - X(s.t[a]), 2), 6); }
-    for (const ev of ctx.source.events || []) { if (ev.t < t0 || ev.t > t1) continue; g.fillStyle = EVENT_COLORS[ev.type] || '#ff6b6b'; g.fillRect(X(ev.t) - 1, 1, 2, hgt - 2); }
-    const x = X(pb.time); g.fillStyle = themeColors().text; g.beginPath(); g.arc(x, mid, 5, 0, Math.PI * 2); g.fill();
-    this.time.textContent = `${fmtTime(pb.time - pb.t0)} / ${fmtTime(pb.duration)} s${this.view ? '  (zoomed)' : ''}`;
+    const g = cv.getContext('2d'), C = themeColors(); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, hgt);
+    const [t0, t1] = this._window(), X = (t) => ((t - t0) / (t1 - t0)) * w, mid = hgt / 2, pad = 8, TH = 4;
+    const clampX = (x) => Math.min(Math.max(x, pad), w - pad);
+    // track: empty, then the part that holds data (live runs grow), then the played part
+    g.fillStyle = C.fill2; capsule(g, pad, w - pad, mid, TH);
+    if (pb.t1 > pb.t0) { g.fillStyle = C.fill; capsule(g, clampX(X(pb.t0)), clampX(X(pb.t1)), mid, TH); }
+    const x = clampX(X(pb.time));
+    g.fillStyle = C.accent; capsule(g, clampX(X(pb.t0)), x, mid, TH);
+    // link outages sit on the track
+    if (s.has('x:link_outage')) { const o = s.series('x:link_outage', ctx.fleet.focus); g.fillStyle = C.bad; for (const [a, b] of runs((i) => o[i] > 0.5, s.T)) capsule(g, clampX(X(s.t[a])), Math.max(clampX(X(s.t[Math.min(b, s.T - 1)])), clampX(X(s.t[a])) + 2), mid, TH); }
+    // events: short ticks above the track, coloured by kind
+    for (const ev of ctx.source.events || []) { if (ev.t < t0 || ev.t > t1) continue; g.fillStyle = C[EVENT_TOKEN[ev.type] || 'warn']; capsule(g, clampX(X(ev.t)) - 1, clampX(X(ev.t)) + 1, mid - 8, 6); }
+    // thumb
+    g.save(); g.shadowColor = 'rgba(0,0,0,.38)'; g.shadowBlur = 4; g.shadowOffsetY = 1; g.fillStyle = '#fff'; g.beginPath(); g.arc(x, mid, 7, 0, Math.PI * 2); g.fill(); g.restore();
+    g.strokeStyle = 'rgba(0,0,0,.1)'; g.lineWidth = 0.5; g.beginPath(); g.arc(x, mid, 7, 0, Math.PI * 2); g.stroke();
+    this.time.textContent = `${fmtTime(pb.time - pb.t0)} / ${fmtTime(pb.duration)} s${this.view ? ' (zoomed)' : ''}`;
+    cv.setAttribute('aria-valuemin', '0'); cv.setAttribute('aria-valuemax', String(Math.round(pb.duration * 100) / 100)); cv.setAttribute('aria-valuenow', String(Math.round((pb.time - pb.t0) * 100) / 100));
   }
 }

@@ -127,7 +127,7 @@ class Scenario:
 
     # ---------------------------------------------------------------------- run
     def to_config(self):
-        """This scenario as a schema-v2 :class:`~aevion.config.SimulationConfig` (migrated from the legacy form)."""
+        """This scenario as a current-schema :class:`~aevion.config.SimulationConfig` (migrated from the legacy form)."""
         from .config import SimulationConfig
         from .config.migrate import migrate
 
@@ -159,7 +159,7 @@ def verify(archive: RunArchive, tol: float = 1e-9, backend: Optional[str] = None
         c = load_config(cfg)
         c.engine.backend = backend or archive.meta.get("backend", c.engine.backend)
         again = Simulation(c).run()
-    else:  # archives written before schema v2
+    else:  # archives written before the configuration schema existed
         sc = Scenario.from_dict(archive.meta["scenario"])
         again = sc.run(backend=backend or archive.meta.get("backend", "numpy"))
     diffs = {}

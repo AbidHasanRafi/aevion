@@ -30,7 +30,7 @@
   - [Run archives](#run-archives)
   - [Writing a plugin](#writing-a-plugin)
   - [Untrusted configurations](#untrusted-configurations)
-  - [Configuration reference (schema version 2)](#configuration-reference-schema-version-2)
+  - [Configuration reference (schema version 1)](#configuration-reference-schema-version-1)
   - [Command line](#command-line)
 - Validation and roadmap
   - [Validation and fidelity](#validation-and-fidelity)
@@ -122,7 +122,7 @@ A configuration is a plain dictionary (or a YAML/JSON file). Everything has a de
 from aevion.engine import Simulation
 
 config = {
-    "schema_version": 2,
+    "schema_version": 1,
     "name": "quickstart",
     "seed": 1,
     "duration": 6.0,
@@ -247,7 +247,7 @@ On a GPU set `engine: {backend: cuda}`; on CPU install the `fast` extra for the 
 
 ### Next
 
-- [Configuration reference](#configuration-reference-schema-version-2): every field, its type, unit and default.
+- [Configuration reference](#configuration-reference-schema-version-1): every field, its type, unit and default.
 - [Machine learning](#machine-learning-guide): Gymnasium and vectorised environments.
 - [Plugins](#writing-a-plugin): add your own sensors, controllers and faults.
 
@@ -260,7 +260,7 @@ On a GPU set `engine: {backend: cuda}`; on CPU install the `fast` extra for the 
 Aevion is organised in layers. Each layer depends only on the ones above it in this list.
 
 ```text
- config      typed, validated, versioned configuration (schema v2) ─ migrates legacy scenarios
+ config      typed, validated, versioned configuration (schema version 1) ─ migrates legacy scenarios (version 0)
  registry    name → factory for every component kind, plus plugin discovery
  engine      Simulation: scheduler, event bus, hooks, fault timeline, RNG streams, health, recording
  components  dynamics (kernels) · controllers · sensors · estimators · networks · swarm · world/wind
@@ -2639,6 +2639,7 @@ offline.
   wheel to zoom every chart at once; events and link outages are drawn on the timeline.
 * Cameras: orbit, chase, top-down and first-person (keys `1`–`4`), follow mode, and a deep link (`#t=5.5&cam=chase&play=0`).
 * Themes: dark, light and print (white page, serif type) for figures; `ui=0` hides every panel.
+* Interface: system font, neutral translucent panels over the scene, switches and a segmented camera control, and SVG icons with text labels for screen readers. It follows the system's reduced-motion, reduced-transparency and increased-contrast settings.
 
 Keyboard: `Space` play/pause, `←/→` step (Shift: ten frames), `[` `]` speed, `R` restart, `1`–`4` camera, `F` follow, `Tab` next
 vehicle, `T V L W C` layers, `H` hide the interface, `D` drawer, `S` screenshot, `?` help.
@@ -2742,7 +2743,7 @@ but the browser must reach the kernel's localhost).
 
 `aevion edit --open` opens an empty scene. Pick a tool and click the ground to place buildings, trees, spheres, waypoints, base
 stations and the start position; drag to move; `Delete` removes; edit dimensions in the properties panel. Download config
-produces an Aevion configuration (`schema_version: 2`) with the world, start position, a waypoint trajectory and, if you placed
+produces an Aevion configuration (`schema_version: 1`) with the world, start position, a waypoint trajectory and, if you placed
 base stations, an `nr_cellular` network:
 
 <!-- docs-test -->
@@ -3025,11 +3026,11 @@ See [SECURITY](#security-policy) for the full threat model.
 <!-- page: config-reference -->
 
 <!-- config-reference:start -->
-## Configuration reference (schema version 2)
+## Configuration reference (schema version 1)
 
 *Generated from the code by `tools/gen_config_docs.py`: do not edit by hand.*
 
-Write `schema_version: 2` at the top of hand-written files. Components accept a bare name (`controller: geometric`) or a mapping with a 
+Write `schema_version: 1` at the top of hand-written files. Components accept a bare name (`controller: geometric`) or a mapping with a 
 `type` (alias `kind`) key plus parameters. Machine-readable version: [simulation.schema.json](docs/simulation.schema.json).
 
 #### `SimulationConfig`
@@ -3038,7 +3039,7 @@ Everything needed to reproduce a simulation.
 
 | field | type | default | constraints | description |
 |---|---|---|---|---|
-| `schema_version` | an integer | `2` |  |  |
+| `schema_version` | an integer | `1` |  |  |
 | `name` | a string | `"simulation"` |  |  |
 | `description` | a string | `""` |  |  |
 | `tags` | a list of a string | `[]` |  |  |
@@ -3473,7 +3474,7 @@ metrics (1):
 Generated from the argument parser (`aevion --help`).
 
 ```text
-usage: aevion [-h]
+usage: aevion [-h] [--version]
               {info,vehicles,registry,plugins,validate,schema,new-plugin,init,demo,run,replay,live,edit,report,inspect,verify,check,diff,convert,pack,unpack,runs,bench,experiment,suite,vision-dataset,methods} ...
 
 Aevion: UAV simulation for research
@@ -3493,7 +3494,7 @@ positional arguments:
     init                write a starter configuration file
     demo                run a demo flight, then write archive + report + 3-D
                         replay
-    run                 run a configuration file (YAML/JSON; schema v2 or legacy
+    run                 run a configuration file (YAML/JSON; current schema or legacy
                         scenario)
     replay              interactive 3-D replay of an archive: HTML file, local
                         server, comparison, screenshot or video
@@ -3525,6 +3526,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --version             show program's version number and exit
 ```
 
 ### `aevion info`

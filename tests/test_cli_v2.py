@@ -13,7 +13,7 @@ def test_init_validate_run_inspect_diff_check_cycle(tmp_path, capsys, monkeypatc
     monkeypatch.setenv("AEVION_HOME", str(tmp_path / "home"))
     cfg = tmp_path / "sim.yaml"
     run_cli("init", str(cfg), "--name", "cli_test")
-    assert cfg.exists() and "schema_version: 2" in cfg.read_text()
+    assert cfg.exists() and "schema_version: 1" in cfg.read_text()
     with pytest.raises(SystemExit) as e:
         run_cli("validate", str(cfg))
     assert e.value.code == 0
@@ -64,7 +64,7 @@ def test_init_validate_run_inspect_diff_check_cycle(tmp_path, capsys, monkeypatc
 
 def test_validate_reports_every_problem_and_exits_nonzero(tmp_path, capsys):
     bad = tmp_path / "bad.yaml"
-    bad.write_text("schema_version: 2\nduration: -3\ncontroller: geometrik\nsensors: [imu, lidr]\nengine: {dt: 1.0}\n", encoding="utf-8")
+    bad.write_text("schema_version: 1\nduration: -3\ncontroller: geometrik\nsensors: [imu, lidr]\nengine: {dt: 1.0}\n", encoding="utf-8")
     with pytest.raises(SystemExit) as e:
         run_cli("validate", str(bad))
     assert e.value.code == 1
@@ -74,7 +74,7 @@ def test_validate_reports_every_problem_and_exits_nonzero(tmp_path, capsys):
 
 def test_run_with_bad_config_prints_clean_error_not_traceback(tmp_path, capsys):
     bad = tmp_path / "bad.json"
-    bad.write_text(json.dumps({"schema_version": 2, "duration": 0}), encoding="utf-8")
+    bad.write_text(json.dumps({"schema_version": 1, "duration": 0}), encoding="utf-8")
     with pytest.raises(SystemExit) as e:
         run_cli("run", str(bad), "--out", str(tmp_path / "o"))
     assert e.value.code == 2

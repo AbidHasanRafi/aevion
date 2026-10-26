@@ -1,6 +1,6 @@
 # A complete, commented scenario.  Validate with:  aevion validate examples/scenarios/forest_figure8.yaml
 # Run with:                                         aevion run examples/scenarios/forest_figure8.yaml --out out --open
-schema_version: 2
+schema_version: 1
 name: forest_figure8
 description: Figure-eight through a forest in turbulence, with a GPS outage in the middle of the flight.
 seed: 7

@@ -168,7 +168,13 @@ def test_future_and_unknown_schema_versions_are_rejected():
     with pytest.raises(ConfigError, match="newer than this Aevion"):
         load_config({"schema_version": 99})
     with pytest.raises(ConfigError, match="no migration"):
-        load_config({"schema_version": 0})
+        load_config({"schema_version": -1})
+
+
+def test_schema_version_zero_is_the_legacy_scenario_format():
+    cfg = load_config({"schema_version": 0, "name": "old", "duration": 1.0})
+    assert cfg.name == "old" and cfg.schema_version == 1
+    assert load_config({"name": "old", "duration": 1.0}).schema_version == 1  # unversioned with legacy keys only: migrated the same way
 
 
 def test_json_schema_is_valid_and_describes_constraints():

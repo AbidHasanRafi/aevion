@@ -1,6 +1,6 @@
 // Scene-editor model (pure): objects the user places in the browser and their conversion to an Aevion configuration.
 //
-// The exported object follows the Aevion configuration schema v2 (a *fragment*: world, trajectory, network, vehicle), so it can be
+// The exported object follows the Aevion configuration schema (a *fragment*: world, trajectory, network, vehicle), so it can be
 // merged into any scenario or run directly: `aevion.viewer.editor.config_from_editor(json)` validates and builds it in Python.
 
 export const TYPES = ['box', 'cylinder', 'sphere', 'waypoint', 'cell', 'start'];
@@ -68,11 +68,11 @@ export class EditorScene {
     return { boxes, spheres, cylinders, bounds, box_colors: boxes.map(() => [0.75, 0.75, 0.78]), sphere_colors: spheres.map(() => [0.8, 0.55, 0.3]), cyl_colors: cylinders.map(() => [0.42, 0.56, 0.3]) };
   }
 
-  /** Aevion configuration fragment (schema v2). */
+  /** Aevion configuration fragment (current schema). */
   toConfig({ name = 'editor_scene', duration = 20, speed = 2.0 } = {}) {
     const start = this.of('start')[0];
     const wps = this.of('waypoint');
-    const cfg = { schema_version: 2, name, duration, world: { type: 'from_dict', params: { data: this.toWorld() } } };
+    const cfg = { schema_version: 1, name, duration, world: { type: 'from_dict', params: { data: this.toWorld() } } };
     if (start) cfg.vehicle = { initial: { pos: [start.x, start.y, start.z] } };
     if (wps.length) cfg.trajectory = { type: 'waypoints', params: { points: [...(start ? [[start.x, start.y, start.z]] : []), ...wps.map((w) => [w.x, w.y, w.z])], speed } };
     const cells = this.of('cell');

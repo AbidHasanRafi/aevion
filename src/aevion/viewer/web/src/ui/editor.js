@@ -1,5 +1,5 @@
 // In-browser scene editor: place buildings, trees, spheres, waypoints, base stations and a start position on the ground, then export an
-// Aevion configuration (schema v2) that `aevion run` executes. The data model lives in data/editor.js (pure, unit-tested).
+// Aevion configuration (current schema) that `aevion run` executes. The data model lives in data/editor.js (pure, unit-tested).
 
 import * as THREE from 'three';
 import { h, toast } from './dom.js';
@@ -40,7 +40,7 @@ export class SceneEditor {
       h('div', { class: 'ed-actions' },
         h('button', { onclick: () => this._download() }, 'Download config (.json)'), h('button', { onclick: () => this._copy() }, 'Copy config'),
         h('button', { onclick: () => this._saveScene() }, 'Save scene'), h('button', { onclick: () => file.click() }, 'Load scene…'), file,
-        h('button', { onclick: () => { this.scene.clear(); this.select(null); this.refresh(); } }, 'Clear')),
+        h('button', { class: 'danger', onclick: () => { this.scene.clear(); this.select(null); this.refresh(); } }, 'Clear')),
       h('div', { class: 'hint' }, 'Run it with:  aevion run scene.json'));
   }
 
@@ -106,7 +106,7 @@ export class SceneEditor {
       const input = h('input', { type: 'number', step: 'any', value: get(), onchange: (e) => { const v = parseFloat(e.target.value); if (!Number.isFinite(v)) return; if (i !== undefined) { const a = [...o[k]]; a[+i] = v; this.scene.update(o.id, { [k]: a }); } else this.scene.update(o.id, { [k]: v }); this.refresh(); } });
       this.props.append(h('label', {}, label, input));
     }
-    this.props.append(h('button', { onclick: () => { this.scene.remove(o.id); this.select(null); this.refresh(); } }, 'Delete'));
+    this.props.append(h('button', { type: 'button', class: 'danger', onclick: () => { this.scene.remove(o.id); this.select(null); this.refresh(); } }, 'Delete'));
   }
 
   config() { return this.scene.toConfig({ name: this.ctx.meta.title || 'editor_scene' }); }

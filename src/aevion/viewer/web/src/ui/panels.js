@@ -5,14 +5,14 @@ import { QUALITY } from '../scene/stage.js';
 import { COLOR_BY } from '../layers/trails.js';
 import { fmtTime } from '../core/util.js';
 
-const THEMES = [['dark', 'Dark'], ['light', 'Light'], ['print', 'Print (white, for figures)']];
+const THEMES = [['dark', 'Dark'], ['light', 'Light'], ['print', 'Print']];
 const QUALITIES = [['auto', 'Auto'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High']];
 const COLOR_LABELS = { speed: 'Speed', altitude: 'Altitude', sinr: 'Link SINR', soc: 'Battery', none: 'Plain' };
 
 export class SidePanel {
   constructor(ctx, root, layers) {
     this.ctx = ctx; this.root = root; this.layers = layers; this.sections = [];
-    root.append(h('div', { class: 'drawer-title' }, 'Aevion viewer'));
+    root.append(h('div', { class: 'drawer-title' }, 'Settings'));
     this.body = h('div', { class: 'drawer-body' }); root.append(this.body);
     this._layers(); this._display(); this._info();
   }
@@ -42,7 +42,7 @@ export class SidePanel {
       h('div', { class: 'row' }, h('span', { class: 'k' }, 'Trail colour'), select(COLOR_BY.filter((c) => c !== 'sinr' || ctx.frames.overview.has('x:link_sinr_db')).map((c) => [c, COLOR_LABELS[c]]), S.get('trailColor'), (v) => apply('trailColor', v))),
       h('div', { class: 'row' }, h('span', { class: 'k' }, 'Trail length'), select([[0, 'Whole path'], [2, '2 s'], [5, '5 s'], [10, '10 s'], [30, '30 s']], S.get('trailSeconds'), (v) => apply('trailSeconds', +v))),
       h('div', { class: 'row' }, h('span', { class: 'k' }, 'Vehicle size'), slider(0.5, Math.max(12, Math.ceil(ctx.fleet.scale * 3)), 0.1, S.get('vehicleScale') || ctx.fleet.scale, (v) => apply('vehicleScale', v))),
-      checkbox('follow focused vehicle', S.get('followFocus'), (v) => apply('followFocus', v)),
+      checkbox('Follow focused vehicle', S.get('followFocus'), (v) => apply('followFocus', v)),
       h('button', { onclick: () => { S.reset(); toast('Settings reset. Reload to apply everything'); } }, 'Reset settings')));
   }
 

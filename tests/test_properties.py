@@ -198,7 +198,7 @@ json_leaf = st.one_of(st.none(), st.booleans(), st.integers(-(10**6), 10**6), st
 json_tree = st.recursive(json_leaf, lambda c: st.one_of(st.lists(c, max_size=4), st.dictionaries(st.text(max_size=8), c, max_size=4)), max_leaves=12)
 
 VALID = {
-    "schema_version": 2,
+    "schema_version": 1,
     "duration": 1.0,
     "seed": 3,
     "vehicle": {"count": 2, "formation": {"type": "line"}},

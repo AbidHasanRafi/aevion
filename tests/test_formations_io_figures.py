@@ -42,7 +42,7 @@ def test_unknown_formation_lists_the_choices():
 
 
 # ------------------------------------------------------------------------------------------ config files
-DOC = {"schema_version": 2, "name": "io", "duration": 3.0, "seed": 5, "vehicle": {"count": 2, "formation": {"type": "ring"}}, "sensors": ["imu"]}
+DOC = {"schema_version": 1, "name": "io", "duration": 3.0, "seed": 5, "vehicle": {"count": 2, "formation": {"type": "ring"}}, "sensors": ["imu"]}
 
 
 @pytest.mark.parametrize("suffix", [".yaml", ".json"])

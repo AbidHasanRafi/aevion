@@ -3,14 +3,14 @@
 // Click or drag on a chart to scrub; hover shows the value; the shared `view` window (set by the timeline brush or the wheel) zooms every
 // chart at once. Events are drawn as ticks, link outages as shaded bands.
 
-import { h, select } from './dom.js';
+import { h, select, iconButton } from './dom.js';
 import { channelInfo, chartCandidates } from '../data/channels.js';
 import { seriesOf } from '../data/derived.js';
 import { decimateMinMax, paddedRange, runs } from '../data/decimate.js';
-import { niceTicks, fmtTick, fmtTime, hexCss, themeColors } from '../core/util.js';
+import { niceTicks, fmtTick, fmtTime, hexCss, themeColors, CANVAS_FONT } from '../core/util.js';
 import { PALETTE } from '../vehicles/procedural.js';
 
-const EVENT_COLORS = { handover: '#4de8ff', rlf: '#ff4d4d', 'fault.start': '#ff9f43', 'fault.end': '#5fe0a0', collision: '#ff4d4d' };
+const EVENT_TOKEN = { handover: 'accent', rlf: 'bad', collision: 'bad', 'fault.start': 'warn', 'fault.end': 'good' };
 
 export class ChartDock {
   constructor(ctx, root) {
@@ -28,7 +28,7 @@ export class ChartDock {
 
   _picker() {
     const cands = chartCandidates(this.ctx.frames.overview);
-    const sel = select([['', '+ add chart…'], ...cands.map((n) => [n, channelInfo(n).label])], '', (v) => { if (v) { this.add(v); sel.value = ''; } });
+    const sel = select([['', 'Add chart…'], ...cands.map((n) => [n, channelInfo(n).label])], '', (v) => { if (v) { this.add(v); sel.value = ''; } });
     this.bar.append(sel);
   }
 
@@ -36,7 +36,7 @@ export class ChartDock {
     if (this.charts.some((c) => c.name === name)) return;
     const info = channelInfo(name);
     const val = h('span', { class: 'val' }), canvas = h('canvas'), box = h('div', { class: 'chart' },
-      h('div', { class: 'cap' }, h('span', {}, `${info.label}${info.unit ? ' (' + info.unit + ')' : ''}`), val, h('button', { class: 'x', title: 'remove', onclick: () => this.remove(name) }, '×')), canvas);
+      h('div', { class: 'cap' }, h('span', {}, `${info.label}${info.unit ? ' (' + info.unit + ')' : ''}`), val, iconButton('xmark', `Remove ${info.label} chart`, () => this.remove(name), { class: 'small x', size: 12 })), canvas);
     this.list.append(box);
     const c = { name, info, canvas, val, box, cache: null };
     this._bind(c); this.charts.push(c); this._save();
@@ -86,7 +86,7 @@ export class ChartDock {
       const cv = c.canvas, w = cv.clientWidth, hgt = cv.clientHeight; if (!w || !hgt) continue;
       if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr); }
       const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, hgt);
-      const { text: txt, dim } = themeColors();
+      const C = themeColors(), { text: txt, dim } = C;
       const rkey = `${s.T}:${s.version}:${t0}:${t1}`;
       if (!c.range || c.range.key !== rkey) {          // the y-range over all vehicles only changes with the data or the zoom window
         let a0 = Infinity, b0 = -Infinity;
@@ -98,31 +98,31 @@ export class ChartDock {
       // outage bands
       if (s.has('x:link_outage') && c.name.startsWith('x:link')) {
         const o = s.series('x:link_outage', focus), bands = runs((i) => o[i] > 0.5, s.T);
-        g.fillStyle = 'rgba(255,77,77,.16)'; for (const [a, b] of bands) g.fillRect(X(s.t[a]), 0, Math.max(X(s.t[Math.min(b, s.T - 1)]) - X(s.t[a]), 1), hgt);
+        g.globalAlpha = 0.16; g.fillStyle = C.bad; for (const [a, b] of bands) g.fillRect(X(s.t[a]), 0, Math.max(X(s.t[Math.min(b, s.T - 1)]) - X(s.t[a]), 1), hgt); g.globalAlpha = 1;
       }
       // grid + labels
-      g.strokeStyle = 'rgba(128,140,170,.18)'; g.lineWidth = 1; g.fillStyle = dim; g.font = '9px system-ui'; g.textBaseline = 'top';
+      g.strokeStyle = C.hair; g.lineWidth = 1; g.fillStyle = dim; g.font = `10px ${CANVAS_FONT}`; g.textBaseline = 'top';
       const ticks = niceTicks(lo, hi, 3), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 0;
       for (const y of ticks) { const py = Y(y); g.beginPath(); g.moveTo(0, py); g.lineTo(w, py); g.stroke(); g.fillText(fmtTick(y, tstep), 3, py + 1); }
       // series
       for (const v of shown) {
-        const col = N === 1 ? '#5cc8ff' : hexCss(PALETTE[v % PALETTE.length]), y = this.series(c, v), d = decimateMinMax(s.t, y, t0, t1, w, s.T);
-        g.strokeStyle = col; g.globalAlpha = v === focus ? 1 : 0.4; g.lineWidth = v === focus ? 1.4 : 1; g.beginPath();
+        const col = N === 1 ? C.accent : hexCss(PALETTE[v % PALETTE.length]), y = this.series(c, v), d = decimateMinMax(s.t, y, t0, t1, w, s.T);
+        g.strokeStyle = col; g.globalAlpha = v === focus ? 1 : 0.4; g.lineWidth = v === focus ? 1.6 : 1; g.lineJoin = 'round'; g.beginPath();
         for (let i = 0; i < d.n; i++) { const a = Y(d.lo[i]), b = Y(d.hi[i]); if (i === 0) g.moveTo(d.x[i], a); else g.lineTo(d.x[i], a); if (b !== a) g.lineTo(d.x[i], b); }
         g.stroke();
       }
       g.globalAlpha = 1;
       // events
-      for (const ev of events) { if (ev.t < t0 || ev.t > t1) continue; g.fillStyle = EVENT_COLORS[ev.type] || '#ff6b6b'; g.fillRect(X(ev.t) - 0.5, hgt - 5, 1.5, 5); }
+      for (const ev of events) { if (ev.t < t0 || ev.t > t1) continue; g.fillStyle = C[EVENT_TOKEN[ev.type] || 'warn']; g.fillRect(X(ev.t) - 0.75, hgt - 6, 1.5, 6); }
       // playhead
-      const px = X(cursor.time); g.strokeStyle = txt; g.lineWidth = 1; g.beginPath(); g.moveTo(px, 0); g.lineTo(px, hgt); g.stroke();
+      const px = X(cursor.time); g.strokeStyle = txt; g.globalAlpha = 0.85; g.lineWidth = 1; g.beginPath(); g.moveTo(px, 0); g.lineTo(px, hgt); g.stroke(); g.globalAlpha = 1;
       const idx = Math.min(cursor.overviewIndex, s.T - 1);
       c.val.textContent = Number.isFinite(this.series(c, focus)[idx]) ? `${this.series(c, focus)[idx].toFixed(2)} ${c.info.unit}` : '–';
       // hover
       if (this.hover && this.hover.c === c) {
         const t = t0 + (this.hover.x / w) * (t1 - t0), i = Math.min(Math.max(s.nearest(t), 0), s.T - 1), y = this.series(c, focus)[i];
         g.strokeStyle = dim; g.beginPath(); g.moveTo(this.hover.x, 0); g.lineTo(this.hover.x, hgt); g.stroke();
-        g.fillStyle = txt; g.font = '10px system-ui'; const label = `${fmtTime(s.t[i] - s.t0)} · ${Number.isFinite(y) ? y.toFixed(2) : '–'}`; const tw = g.measureText(label).width;
+        g.fillStyle = txt; g.font = `500 11px ${CANVAS_FONT}`; const label = `${fmtTime(s.t[i] - s.t0)} · ${Number.isFinite(y) ? y.toFixed(2) : '–'}`; const tw = g.measureText(label).width;
         g.fillText(label, Math.min(this.hover.x + 6, w - tw - 4), 12);
       }
     }

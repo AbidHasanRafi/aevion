@@ -58,7 +58,7 @@ def test_yaml_numbers_with_unsigned_exponents_are_floats_not_strings(tmp_path):
     d = yaml_loads("a: 3.5e9\nb: 1e-3\nc: 2E6\nd: 1.0e+5\ne: 10\nf: abc\ng: 1e\nh: [1e3, 2.5]\ni: j5\n")
     assert d == {"a": 3.5e9, "b": 1e-3, "c": 2e6, "d": 1e5, "e": 10, "f": "abc", "g": "1e", "h": [1e3, 2.5], "i": "j5"}
     p = tmp_path / "c.yaml"
-    p.write_text("schema_version: 2\nduration: 2\nnetwork:\n  type: nr_cellular\n  params: {freq_hz: 3.5e9, sites: [{pos: [0, 0, 25]}]}\n")
+    p.write_text("schema_version: 1\nduration: 2\nnetwork:\n  type: nr_cellular\n  params: {freq_hz: 3.5e9, sites: [{pos: [0, 0, 25]}]}\n")
     assert load_config(p).network.params["freq_hz"] == 3.5e9
 
 

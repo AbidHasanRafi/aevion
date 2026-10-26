@@ -2,7 +2,7 @@
 # a no-fly zone, an urban wake wind and the extended sensors.
 # Validate with:  aevion validate examples/scenarios/urban_environment.yaml
 # Run with:       aevion run examples/scenarios/urban_environment.yaml --out out --open
-schema_version: 2
+schema_version: 1
 name: urban_environment
 description: Orbit over a small block of buildings in Zurich with a bird-like obstacle, a mast keep-out zone and GNSS in the canyons.
 seed: 7

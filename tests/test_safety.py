@@ -153,9 +153,9 @@ def test_plugins_can_be_disabled_by_environment(monkeypatch):
 # ------------------------------------------------------------------------------------- CLI
 def test_cli_validate_and_run_untrusted(tmp_path, capsys):
     good = tmp_path / "good.yaml"
-    good.write_text("schema_version: 2\nduration: 0.4\nsensors: [imu]\n")
+    good.write_text("schema_version: 1\nduration: 0.4\nsensors: [imu]\n")
     bad = tmp_path / "bad.yaml"
-    bad.write_text("schema_version: 2\nduration: 100000\n")
+    bad.write_text("schema_version: 1\nduration: 100000\n")
     with pytest.raises(SystemExit) as e:
         main(["validate", "--untrusted", str(good)])
     assert e.value.code == 0

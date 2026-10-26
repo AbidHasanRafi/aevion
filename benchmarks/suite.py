@@ -147,7 +147,7 @@ def _cfg():
     from aevion.config import load_config
 
     doc = {
-        "schema_version": 2,
+        "schema_version": 1,
         "duration": 10.0,
         "vehicle": {"count": 4, "formation": {"type": "ring"}},
         "sensors": ["imu", {"type": "gps", "params": {"rate": 5}}, "baro"],

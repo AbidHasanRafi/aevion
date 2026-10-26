@@ -36,7 +36,7 @@ CASES = {
 }
 
 CONFIG = {
-    "schema_version": 2,
+    "schema_version": 1,
     "name": "golden-figures",
     "seed": 7,
     "duration": 6.0,

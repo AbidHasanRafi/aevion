@@ -1,4 +1,4 @@
-"""Configuration sections for a simulation (schema version 2).
+"""Configuration sections for a simulation (schema version 1).
 
 Components that come from a registry (controllers, sensors, winds, …) are written either as a bare name
 (``"geometric"``) or as a mapping with a ``type`` (alias ``kind``) key plus parameters::
@@ -19,7 +19,7 @@ from ..errors import ConfigIssue
 from ..registry.introspect import accepted_params
 from .schema import Block, _check_meta, _hints, _join, _parse, _suggest, spec
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 1
 
 # context positional arguments each registry's factories receive before the user parameters
 _CONTEXT_ARGS = {"controllers": 1, "estimators": 1, "formations": 1, "swarm_laws": 1}
@@ -396,7 +396,7 @@ class EngineConfig(Block):
 class SimulationConfig(Block):
     """Everything needed to reproduce a simulation."""
 
-    schema_version: int = SCHEMA_VERSION  # write 'schema_version: 2' at the top of hand-written files
+    schema_version: int = SCHEMA_VERSION  # write 'schema_version: 1' at the top of hand-written files
     name: str = "simulation"
     description: str = ""
     tags: List[str] = field(default_factory=list)

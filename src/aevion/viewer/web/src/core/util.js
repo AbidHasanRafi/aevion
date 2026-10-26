@@ -99,13 +99,23 @@ export function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-/** Text/dim colours of the active theme (read from the CSS tokens once per theme, not once per chart per frame). */
+/** Font for canvas text: the interface face, at the 10 px minimum used for chart labels. */
+export const CANVAS_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif';
+
+/** Colours of the active theme (read from the CSS tokens once per theme, not once per chart per frame). */
 let themeCache = { key: null, v: null };
 export function themeColors() {
   const key = document.documentElement.dataset.theme || '';
   if (themeCache.key !== key) {
-    const css = getComputedStyle(document.documentElement);
-    themeCache = { key, v: { text: css.getPropertyValue('--text').trim() || '#ffffff', dim: css.getPropertyValue('--dim').trim() || '#99a3b8' } };
+    const css = getComputedStyle(document.documentElement), token = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
+    themeCache = {
+      key,
+      v: {
+        text: token('--text', '#ffffff'), dim: token('--dim', '#99a3b8'), faint: token('--faint', '#666'), hair: token('--hair', 'rgba(128,128,128,.2)'),
+        fill: token('--fill', 'rgba(120,120,128,.38)'), fill2: token('--fill2', 'rgba(120,120,128,.26)'), accent: token('--accent', '#0a84ff'),
+        good: token('--good', '#30d158'), bad: token('--bad', '#ff453a'), warn: token('--warn', '#ff9f0a'),
+      },
+    };
   }
   return themeCache.v;
 }

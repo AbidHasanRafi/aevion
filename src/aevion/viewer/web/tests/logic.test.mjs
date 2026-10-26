@@ -106,7 +106,7 @@ test('editor exports the Aevion world and configuration', () => {
   assert.deepEqual(w.boxes, [[15, -4, 0, 25, 4, 6]]); assert.deepEqual(w.cylinders, [[-10, 5, 0, 8, 0.6]]); assert.deepEqual(w.spheres, [[3, 3, 4, 1]]);
   assert.equal(w.box_colors.length, 1); assert.equal(w.bounds.length, 6);
   const c = s.toConfig({ name: 'demo', duration: 30, speed: 3 });
-  assert.equal(c.schema_version, 2); assert.equal(c.name, 'demo'); assert.equal(c.world.type, 'from_dict');
+  assert.equal(c.schema_version, 1); assert.equal(c.name, 'demo'); assert.equal(c.world.type, 'from_dict');
   assert.deepEqual(c.vehicle.initial.pos, [0, 0, 1]);
   assert.deepEqual(c.trajectory, { type: 'waypoints', params: { points: [[0, 0, 1], [30, 10, 6], [40, -5, 7]], speed: 3 } });
   assert.deepEqual(c.network.params.sites, [{ pos: [-50, 0, 30], sectors: 1, tx_power_dbm: 40 }]);

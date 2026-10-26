@@ -11,7 +11,7 @@ export const SHORTCUTS = [
 
 export function buildHelp() {
   const el = h('div', { id: 'help-overlay', hidden: true, onclick: () => { el.hidden = true; } },
-    h('div', { class: 'help-card' }, h('h2', {}, 'Keyboard shortcuts'), h('table', {}, SHORTCUTS.map(([k, v]) => h('tr', {}, h('td', {}, h('kbd', {}, k)), h('td', {}, v)))), h('p', { class: 'dim' }, 'Click anywhere to close. Deep links: #t=5.5&cam=chase&play=0&ui=0')));
+    h('div', { class: 'help-card' }, h('h2', {}, 'Keyboard shortcuts'), h('table', {}, SHORTCUTS.map(([k, v]) => h('tr', {}, h('td', {}, h('kbd', {}, k)), h('td', {}, v)))), h('p', { class: 'dim' }, 'Click anywhere or press Esc to close. Deep links: #t=5.5&cam=chase&play=0&ui=0')));
   document.body.append(el);
   return el;
 }

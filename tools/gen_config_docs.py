@@ -97,11 +97,11 @@ def main(argv=None):
 
     argv = sys.argv[1:] if argv is None else argv
     parts = [
-        "## Configuration reference (schema version 2)",
+        "## Configuration reference (schema version 1)",
         "",
         "*Generated from the code by `tools/gen_config_docs.py`: do not edit by hand.*",
         "",
-        "Write `schema_version: 2` at the top of hand-written files. Components accept a bare name (`controller: geometric`) or a mapping with a ",
+        "Write `schema_version: 1` at the top of hand-written files. Components accept a bare name (`controller: geometric`) or a mapping with a ",
         "`type` (alias `kind`) key plus parameters. Machine-readable version: [simulation.schema.json](docs/simulation.schema.json).",
         "",
     ]

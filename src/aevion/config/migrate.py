@@ -1,7 +1,7 @@
 """Schema migrations: convert older configuration dicts to the current schema.
 
 Each migration is a function ``dict -> dict`` registered for the *source* version. legacy scenarios have no
-``schema_version`` key and are treated as version 1.
+``schema_version`` key and are treated as version 0.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ def migration(from_version: int) -> Any:
 
 
 # every key a legacy Scenario dict can contain
-V1_KEYS = {
+LEGACY_KEYS = {
     "name",
     "vehicle",
     "world",
@@ -61,19 +61,19 @@ def detect_version(d: dict) -> int:
             return int(v)
         except ValueError:
             raise ValueError(f"schema_version must be an integer, got {v!r}") from None
-    return 1 if set(d) <= V1_KEYS and not _has_v2_shape(d) else SCHEMA_VERSION
+    return 0 if set(d) <= LEGACY_KEYS and not _has_current_shape(d) else SCHEMA_VERSION
 
 
-# legacy and v2 share most key names; these are the places where the same key holds a different *shape* in v2
-_V2_VEHICLE_KEYS = {"model", "count", "formation", "overrides", "initial"}
+# legacy and current share most key names; these are the places where the same key holds a different *shape* in the current schema
+_CURRENT_VEHICLE_KEYS = {"model", "count", "formation", "overrides", "initial"}
 
 
-def _has_v2_shape(d: dict) -> bool:
+def _has_current_shape(d: dict) -> bool:
     """Evidence that an unversioned document is written for the current schema rather than as a legacy scenario."""
     if isinstance(d.get("controller"), dict):
         return True
     veh = d.get("vehicle")
-    if isinstance(veh, dict) and set(veh) & _V2_VEHICLE_KEYS:
+    if isinstance(veh, dict) and set(veh) & _CURRENT_VEHICLE_KEYS:
         return True
     traj = d.get("trajectory")  # legacy trajectories are {"kind": ...}; world/wind dicts reuse "type", so only "params" is conclusive
     if isinstance(traj, dict) and ("type" in traj or "params" in traj):
@@ -86,12 +86,12 @@ def _has_v2_shape(d: dict) -> bool:
     return isinstance(sensors, list) and any(isinstance(s, dict) for s in sensors)
 
 
-@migration(1)
-def _v1_to_v2(d: dict) -> dict:
+@migration(0)
+def _legacy_to_current(d: dict) -> dict:
     """Legacy ``Scenario.to_dict()`` to a :class:`SimulationConfig` dict."""
     d = copy.deepcopy(d)
     out: dict = {
-        "schema_version": 2,
+        "schema_version": SCHEMA_VERSION,
         "name": d.get("name", "scenario"),
         "description": d.get("notes", ""),
         "seed": d.get("seed", 0),
